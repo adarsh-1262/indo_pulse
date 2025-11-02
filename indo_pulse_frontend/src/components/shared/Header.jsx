@@ -35,7 +35,7 @@ const Header = () => {
                     <li className='hidden lg:inline text-slate-700 hover:underline'>News Articles</li>
                 </Link>
             </ul>
-            <Link to={'/sign-in'}>
+            <Link to={'/signin'}>
                 <Button>Sign In</Button>
             </Link>
         </div>
