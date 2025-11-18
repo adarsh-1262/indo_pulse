@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
+import { useDispatch, useSelector } from "react-redux"
+import { signInFailure, signInStart, signInSuccess } from "@/redux/user/userSlice"
 
 const formSchema = z.object({
   email: z.email({ message: "Invalid email address" }),
@@ -21,13 +23,13 @@ const formSchema = z.object({
     .string()
     .min(8, { message: "Password must be at least 8 characters long" })
     .max(100, { message: "Password must be at most 100 characters long" }),
-});
+})
 
 const SignInForm = () => {
   const navigate = useNavigate()
 
-  const [loading, setLoading] = useState(false)
-  const [errorMessage, setErrorMessage] = useState(null)
+  const dispatch = useDispatch()
+  const {loading, error: errorMessage} = useSelector((state) => state.user)
 
   // 1. Define your form
   const form = useForm({
@@ -41,8 +43,7 @@ const SignInForm = () => {
   // 2. Define a submit Handler
   async function onSubmit(values) {
     try {
-      setLoading(true)
-      setErrorMessage(null)
+      dispatch(signInStart())
 
       const res = await fetch("/api/auth/signin", {
         method: "POST",
@@ -53,21 +54,18 @@ const SignInForm = () => {
       const data = await res.json()
 
       if (data.success === false) {
-        setLoading(false)
         toast.error("Sign in failed! Please try again.")
-        return setErrorMessage(data.message)
+        dispatch(signInFailure(data.message))
       }
 
-      setLoading(false)
-
       if (res.ok) {
+        dispatch(signInSuccess(data))
         toast.success("Sign in Successful!")
         navigate("/")
       }
     } catch (error) {
-      setErrorMessage(error.message)
-      setLoading(false)
       toast.error("Something went wrong!")
+      dispatch(signInFailure(error.message))
     }
   }
   return (
